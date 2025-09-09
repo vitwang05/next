@@ -1,5 +1,6 @@
 import { useQuery } from "@apollo/client/react";
 import { GET_PRODUCTS } from "../graphql/queries/products";
+import ProductCard from "../components/ProductCard";
 
 export default function Home() {
   const { loading, error, data } = useQuery(GET_PRODUCTS);
@@ -25,32 +26,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((product) => (
-              <a
-                key={product.id}
-                href={`/product/${product.slug}`}
-                className="bg-white rounded-2xl shadow hover:shadow-lg transition p-4 flex flex-col"
-              >
-                {product.image?.sourceUrl && (
-                  <img
-                    src={product.image.sourceUrl}
-                    alt={product.name}
-                    className="w-full h-48 object-cover rounded-xl"
-                  />
-                )}
-                <h3 className="mt-4 text-lg font-bold line-clamp-1">
-                  {product.name}
-                </h3>
-                <div
-                  className="text-sm text-gray-600 mt-2 line-clamp-2"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-                <p className="mt-auto text-blue-600 font-semibold text-lg" dangerouslySetInnerHTML={{
-                  __html: product.price || product.regularPrice || "Liên hệ",
-                }} />
-                <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition">
-                  Xem chi tiết
-                </button>
-              </a>
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}

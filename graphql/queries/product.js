@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client";
 
-
 export const GET_PRODUCT = gql`
   query Product($slug: ID!) {
     product(id: $slug, idType: SLUG) {
@@ -18,6 +17,7 @@ export const GET_PRODUCT = gql`
         sourceUrl
       }
       name
+
       ... on SimpleProduct {
         salePrice
         regularPrice
@@ -25,6 +25,7 @@ export const GET_PRODUCT = gql`
         id
         stockQuantity
       }
+
       ... on VariableProduct {
         salePrice
         regularPrice
@@ -40,7 +41,7 @@ export const GET_PRODUCT = gql`
             name
           }
         }
-        variations {
+        variations(first: 50) {   # 👈 thêm first: 50 (hoặc hơn nếu nhiều)
           nodes {
             id
             databaseId
@@ -51,6 +52,12 @@ export const GET_PRODUCT = gql`
             onSale
             salePrice
             regularPrice
+            attributes {
+              nodes {
+                name
+                value
+              }
+            }
           }
         }
       }
@@ -60,6 +67,7 @@ export const GET_PRODUCT = gql`
         id
         externalUrl
       }
+
       ... on GroupProduct {
         products {
           nodes {
