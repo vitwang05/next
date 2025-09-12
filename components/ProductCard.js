@@ -54,7 +54,7 @@ export default function ProductCard({ product, className = "" }) {
 
       {/* Product details */}
       <div className="p-5">
-        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{product.name}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 truncate">{product.name}</h3>
 
         {/* {product.description && (
           <div

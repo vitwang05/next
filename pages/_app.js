@@ -1,6 +1,7 @@
 import "../styles/globals.css"
 import { ApolloProvider } from '@apollo/client/react'
 import client from '../lib/apolloClient'
+import { AuthProvider } from '../contexts/AuthContext'
 import { Header, Footer, BackToTop } from '../components'
 import { useEffect } from 'react'
 
@@ -45,11 +46,13 @@ function Effects() {
 function MyApp({ Component, pageProps }) {
   return (
     <ApolloProvider client={client}>
-      <Effects />
-      <Header />
-      <Component {...pageProps} />
-      <Footer />
-      <BackToTop />
+      <AuthProvider>
+        <Effects />
+        <Header />
+        <Component {...pageProps} />
+        <Footer />
+        <BackToTop />
+      </AuthProvider>
     </ApolloProvider>
   )
 }

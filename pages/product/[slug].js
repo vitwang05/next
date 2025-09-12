@@ -1,9 +1,11 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { useState, useMemo } from "react";
-import { GET_PRODUCT } from "../../graphql/queries/product";
+import { useState, useMemo, useRef } from "react";
+import { GET_PRODUCT, GET_RELATED_PRODUCTS } from "../../graphql/queries/product";
 import { ADD_TO_CART } from "../../graphql/mutations/cart";
+import ProductCard from "../../components/ProductCard";
+import RelatedProductsCarousel from "../../components/RelatedProductsCarousel";
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -16,8 +18,27 @@ export default function ProductDetailPage() {
 
   const [addToCart, { loading: adding }] = useMutation(ADD_TO_CART);
 
-  // State for variable products (attributes)
+  // Get related products
   const product = data?.product;
+  const categorySlugs = product?.productCategories?.nodes?.map(cat => cat.slug) || [];
+  const { data: relatedData, loading: relatedLoading } = useQuery(GET_RELATED_PRODUCTS, {
+    skip: !product || categorySlugs.length === 0,
+    variables: {
+      categorySlugs,
+      first: 8
+    }
+  });
+
+  // Slider ref for related products
+  const relatedSliderRef = useRef(null);
+  const scrollRelatedSlider = (direction) => {
+    const container = relatedSliderRef.current;
+    if (!container) return;
+    const amount = Math.max(300, container.clientWidth * 0.75);
+    container.scrollBy({ left: direction === "next" ? amount : -amount, behavior: "smooth" });
+  };
+
+  // State for variable products (attributes)
   const isVariable = product?.__typename === "VariableProduct";
   // Derive available attribute options from variations to ensure accuracy
   const { colors, sizes } = useMemo(() => {
@@ -150,6 +171,10 @@ export default function ProductDetailPage() {
   } else if (product.price || product.regularPrice) {
     priceContent = product.price || product.regularPrice;
   }
+
+  const CONTACT_CHAT_URL =
+    process.env.NEXT_PUBLIC_CONTACT_CHAT_URL || "https://m.me/yourpage";
+  const isContactOnly = priceContent === "Liên hệ" || product.__typename === "ExternalProduct";
 
   async function handleAddToCart() {
     try {
@@ -326,8 +351,17 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Nút thêm giỏ hàng (ẩn nếu ExternalProduct) */}
-          {product.__typename !== "ExternalProduct" && (
+          {/* Nút hành động theo giá */}
+          {isContactOnly ? (
+            <a
+              href={CONTACT_CHAT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 w-full inline-block text-center bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition"
+            >
+              Liên hệ
+            </a>
+          ) : (
             <button
               disabled={adding}
               onClick={handleAddToCart}
@@ -338,6 +372,45 @@ export default function ProductDetailPage() {
           )}
         </div>
       </main>
+
+      {/* Related Products Section */}
+      {(() => {
+        const related = (relatedData?.products?.nodes || []).filter(p => p?.id !== product?.id);
+        if (related.length === 0) return null;
+        return (
+          <section className="py-12 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Sản phẩm liên quan</h2>
+                <div className="hidden md:flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => scrollRelatedSlider("prev")}
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                    aria-label="Prev"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollRelatedSlider("next")}
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                    aria-label="Next"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <RelatedProductsCarousel items={related} />
+            </div>
+          </section>
+        );
+      })()}
     </div>
   );
 }

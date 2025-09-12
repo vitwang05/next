@@ -17,6 +17,13 @@ export const GET_PRODUCT = gql`
         sourceUrl
       }
       name
+      productCategories {
+        nodes {
+          id
+          name
+          slug
+        }
+      }
 
       ... on SimpleProduct {
         salePrice
@@ -78,6 +85,39 @@ export const GET_PRODUCT = gql`
           }
         }
         id
+      }
+    }
+  }
+`;
+
+export const GET_RELATED_PRODUCTS = gql`
+  query GetRelatedProducts($categorySlugs: [String], $first: Int = 8) {
+    products(first: $first, where: { categoryIn: $categorySlugs }) {
+      nodes {
+        id
+        name
+        slug
+        description
+        onSale
+        ... on SimpleProduct {
+          price
+          regularPrice
+          salePrice
+          onSale
+        }
+        ... on VariableProduct {
+          price
+          regularPrice
+          salePrice
+          onSale
+        }
+        ... on ExternalProduct {
+          price
+          externalUrl
+        }
+        image {
+          sourceUrl
+        }
       }
     }
   }

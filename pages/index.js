@@ -55,7 +55,7 @@ export default function Home() {
       </section>
 
       {/* New Arrivals - white */}
-      <section className="section reveal bg-white">
+      <section id="new" className="section reveal bg-white">
         <div className="container-responsive">
           <div className="section-header">
             <h2 className="section-title">Hàng mới về</h2>
@@ -79,7 +79,7 @@ export default function Home() {
       </section>
 
       {/* Popular - gray */}
-      <section className="section reveal bg-gray-100">
+      <section id="popular" className="section reveal bg-gray-100">
         <div className="container-responsive">
           <div className="section-header">
             <h2 className="section-title">Bán chạy</h2>

@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { GET_CART } from "../../graphql/queries/cart";
 import { REMOVE_FROM_CART, UPDATE_CART_ITEM, CLEAR_CART } from "../../graphql/mutations/cart";
 
 export default function CartPage() {
+  const router = useRouter();
   const { loading, error, data, refetch } = useQuery(GET_CART, {
     notifyOnNetworkStatusChange: true,
     fetchPolicy: "network-only",
@@ -91,28 +93,27 @@ export default function CartPage() {
   async function handleCheckout() {
     setIsCheckoutLoading(true);
     try {
-      // Simulate checkout process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Chức năng thanh toán đang được phát triển!');
+      // Redirect to checkout page
+      await router.push('/checkout');
     } catch (e) {
       console.error('Checkout error:', e);
-      alert('Có lỗi khi xử lý thanh toán. Vui lòng thử lại.');
+      alert('Có lỗi khi chuyển đến trang thanh toán. Vui lòng thử lại.');
     } finally {
       setIsCheckoutLoading(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-50 flex flex-col mt-16">
-      {/* Fixed Header */}
-      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4 flex-shrink-0">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-900">Giỏ hàng ({itemCount} sản phẩm)</h1>
+    <div className="min-h-screen bg-gray-50 pt-16">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Giỏ hàng ({itemCount} sản phẩm)</h1>
           {items.length > 0 && (
             <button
               onClick={handleClearCart}
               disabled={clearing}
-              className="px-4 py-2 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-60"
+              className="px-3 py-2 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-60"
             >
               {clearing ? "Đang xóa..." : "Xóa tất cả"}
             </button>
@@ -120,11 +121,11 @@ export default function CartPage() {
         </div>
       </div>
 
-      {/* Main Content Area - Fixed Layout */}
-      <div className="flex-1 flex overflow-hidden">
-        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
-          {/* Cart Items - Only Scrollable Area */}
-          <div className="flex-1 overflow-y-auto pr-2">
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Cart Items */}
+          <div className="lg:col-span-2">
             {loading ? (
               <div className="flex items-center justify-center h-full min-h-[400px]">
                 <div className="text-center">
@@ -157,7 +158,7 @@ export default function CartPage() {
                   const subtotalHtml = item.subtotal || "";
                   return (
                     <div key={item.key} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-start space-x-4">
+                      <div className="flex items-start space-x-4"> 
                         {/* Product Image */}
                         <div className="flex-shrink-0">
                           {p?.image?.sourceUrl ? (
@@ -232,34 +233,39 @@ export default function CartPage() {
             )}
           </div>
 
-          {/* Fixed Summary Sidebar - Completely Fixed */}
+          {/* Order Summary Sidebar */}
           {items.length > 0 && (
-            <div className="w-80 flex-shrink-0">
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 h-fit">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Tóm tắt đơn hàng</h3>
+            <div className="lg:col-span-1">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 sticky top-24">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Tóm tắt đơn hàng</h3>
                 
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Số sản phẩm:</span>
-                    <span className="font-medium">{itemCount}</span>
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Số sản phẩm</span>
+                    <span className="font-medium text-gray-900">{itemCount} sản phẩm</span>
                   </div>
                   
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Tạm tính:</span>
-                    <span className="font-medium" dangerouslySetInnerHTML={{ __html: subtotal }} />
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Tạm tính</span>
+                    <span className="font-medium text-gray-900" dangerouslySetInnerHTML={{ __html: subtotal }} />
                   </div>
                   
-                  <div className="border-t border-gray-200 pt-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Phí vận chuyển</span>
+                    <span className="font-medium text-green-600">Miễn phí</span>
+                  </div>
+                  
+                  <div className="border-t border-gray-200 pt-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-semibold text-gray-900">Tổng cộng:</span>
-                      <span className="text-xl font-bold text-gray-900" dangerouslySetInnerHTML={{ __html: total }} />
+                      <span className="text-lg font-semibold text-gray-900">Tổng cộng</span>
+                      <span className="text-xl font-bold text-blue-600" dangerouslySetInnerHTML={{ __html: total }} />
                     </div>
                   </div>
                 </div>
                 
                 <button 
                   onClick={handleCheckout}
-                  className="w-full bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isCheckoutLoading || removing || clearing}
                 >
                   {isCheckoutLoading ? (
@@ -268,16 +274,23 @@ export default function CartPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Đang xử lý thanh toán...
+                      Đang xử lý...
                     </div>
                   ) : (
                     "Tiến hành thanh toán"
                   )}
                 </button>
                 
-                <p className="text-xs text-gray-500 text-center mt-3">
-                  Miễn phí vận chuyển cho đơn hàng từ 500.000đ
-                </p>
+                <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-xs text-green-700">
+                      Miễn phí vận chuyển cho đơn hàng từ 500.000đ
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
