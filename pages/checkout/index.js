@@ -5,8 +5,8 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { GET_CART } from "../../graphql/queries/cart";
 import { GET_PAYMENT_GATEWAYS } from "../../graphql/queries/checkout";
 import { CHECKOUT } from "../../graphql/mutations/checkout";
-
-export default function CheckoutPage() {
+import {withAuth} from "../../utils/withAuth";
+function CheckoutPage() {
   const router = useRouter();
   const { data: cartData, loading: cartLoading } = useQuery(GET_CART);
   const { data: paymentData, loading: paymentLoading } = useQuery(GET_PAYMENT_GATEWAYS);
@@ -518,3 +518,6 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+
+export default withAuth(CheckoutPage);

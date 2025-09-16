@@ -21,8 +21,9 @@ export const LOGIN_CUSTOMER = gql`
       authToken
       user {
         id
-        username
+        databaseId
         email
+        username
         firstName
         lastName
         displayName
